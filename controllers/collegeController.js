@@ -1,11 +1,12 @@
-const db = require("../database");
+const collegeService = require("../services/collegeServices");
 
 // Get all colleges
 const getAllColleges = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT * FROM colleges ORDER BY college_name",
-    );
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    
+    const rows = await collegeService.getAllColleges(limit, offset);
     res.status(200).json({
       success: true,
       count: rows.length,
@@ -23,9 +24,9 @@ const getAllColleges = async (req, res) => {
 const getCollegeById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query("SELECT * FROM colleges WHERE id = ?", [id]);
+    const college = await collegeService.getCollegeById(id);
 
-    if (rows.length === 0) {
+    if (!college) {
       return res.status(404).json({
         success: false,
         message: "College not found",
@@ -34,7 +35,7 @@ const getCollegeById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: rows[0],
+      data: college,
     });
   } catch (error) {
     res.status(500).json({
@@ -47,7 +48,7 @@ const getCollegeById = async (req, res) => {
 // Create new college
 const createCollege = async (req, res) => {
   try {
-    const { college_name, college_code, description } = req.body;
+    const { college_name } = req.body;
 
     if (!college_name) {
       return res.status(400).json({
@@ -56,19 +57,12 @@ const createCollege = async (req, res) => {
       });
     }
 
-    const [result] = await db.query(
-      "INSERT INTO colleges (college_name, college_code, description) VALUES (?, ?, ?)",
-      [college_name, college_code || null, description || null],
-    );
-
-    const [newCollege] = await db.query("SELECT * FROM colleges WHERE id = ?", [
-      result.insertId,
-    ]);
+    const newCollege = await collegeService.createCollege(college_name);
 
     res.status(201).json({
       success: true,
       message: "College created successfully",
-      data: newCollege[0],
+      data: newCollege,
     });
   } catch (error) {
     res.status(500).json({
@@ -82,62 +76,29 @@ const createCollege = async (req, res) => {
 const updateCollege = async (req, res) => {
   try {
     const { id } = req.params;
-    const { college_name, college_code, description, status } = req.body;
+    const { college_name } = req.body;
 
-    const [existing] = await db.query("SELECT * FROM colleges WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await collegeService.getCollegeByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "College not found",
       });
     }
 
-    const updates = [];
-    const values = [];
+    const updatedCollege = await collegeService.updateCollege(id, college_name);
 
-    if (college_name) {
-      updates.push("college_name = ?");
-      values.push(college_name);
-    }
-    if (college_code !== undefined) {
-      updates.push("college_code = ?");
-      values.push(college_code);
-    }
-    if (description !== undefined) {
-      updates.push("description = ?");
-      values.push(description);
-    }
-    if (status) {
-      updates.push("status = ?");
-      values.push(status);
-    }
-
-    if (updates.length === 0) {
+    if (!updatedCollege) {
       return res.status(400).json({
         success: false,
         message: "No fields to update",
       });
     }
 
-    values.push(id);
-
-    await db.query(
-      `UPDATE colleges SET ${updates.join(", ")} WHERE id = ?`,
-      values,
-    );
-
-    const [updatedCollege] = await db.query(
-      "SELECT * FROM colleges WHERE id = ?",
-      [id],
-    );
-
     res.status(200).json({
       success: true,
       message: "College updated successfully",
-      data: updatedCollege[0],
+      data: updatedCollege,
     });
   } catch (error) {
     res.status(500).json({
@@ -152,18 +113,15 @@ const deleteCollege = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [existing] = await db.query("SELECT * FROM colleges WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await collegeService.getCollegeByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "College not found",
       });
     }
 
-    await db.query("DELETE FROM colleges WHERE id = ?", [id]);
+    await collegeService.deleteCollege(id);
 
     res.status(200).json({
       success: true,

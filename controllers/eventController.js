@@ -1,20 +1,20 @@
 const db = require("../database");
+const eventService = require("../services/eventsServices");
 
 // Get all events (for Management/Admin)
 const getAllEvents = async (req, res) => {
   try {
-    const [events] = await db.query(
-      `SELECT e.*, 
-              CONCAT(s.first_name, ' ', s.last_name) as created_by_name,
-              s.email as created_by_email
-       FROM events e 
-       LEFT JOIN staff_users s ON e.created_by = s.id 
-       ORDER BY e.start_time DESC`
-    );
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
+    
+    const { rows, total } = await eventService.getEvents(limit, offset);
 
     res.json({
       success: true,
-      data: events,
+      data: rows,
+      total,
+      limit,
+      offset,
     });
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -28,14 +28,7 @@ const getAllEvents = async (req, res) => {
 // Get active events (currently ongoing)
 const getActiveEvents = async (req, res) => {
   try {
-    const now = new Date();
-    const [events] = await db.query(
-      `SELECT * FROM events 
-       WHERE start_time <= ? AND end_time >= ?
-       ORDER BY start_time ASC`,
-      [now, now]
-    );
-
+    const events = await eventService.getActiveEvents();
     res.json({
       success: true,
       data: events,
@@ -52,15 +45,7 @@ const getActiveEvents = async (req, res) => {
 // Get upcoming events
 const getUpcomingEvents = async (req, res) => {
   try {
-    const now = new Date();
-    const [events] = await db.query(
-      `SELECT * FROM events 
-       WHERE start_time > ?
-       ORDER BY start_time ASC
-       LIMIT 10`,
-      [now]
-    );
-
+    const events = await eventService.getUpcomingEvents();
     res.json({
       success: true,
       data: events,
@@ -78,16 +63,9 @@ const getUpcomingEvents = async (req, res) => {
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [events] = await db.query(
-      `SELECT e.*, 
-              CONCAT(s.first_name, ' ', s.last_name) as created_by_name
-       FROM events e 
-       LEFT JOIN staff_users s ON e.created_by = s.id
-       WHERE e.id = ?`,
-      [id]
-    );
+    const events = await eventService.getEventById(id);
 
-    if (events.length === 0) {
+    if (!events || events.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Event not found",
@@ -110,28 +88,30 @@ const getEventById = async (req, res) => {
 // Create new event (Management/Admin only)
 const createEvent = async (req, res) => {
   try {
-    const { title, description, start_time, end_time } = req.body;
+    const { title, description, start_datetime, end_datetime } = req.body;
 
     // Validation
-    if (!title || !start_time || !end_time) {
+    if (!title || !start_datetime || !end_datetime) {
       return res.status(400).json({
         success: false,
-        message: "Title, start_time, and end_time are required",
+        message: "Title, start_datetime, and end_datetime are required",
       });
     }
 
-    // Check if end_time is after start_time
-    if (new Date(end_time) <= new Date(start_time)) {
+    // Check if end_datetime is after start_datetime
+    if (new Date(end_datetime) <= new Date(start_datetime)) {
       return res.status(400).json({
         success: false,
         message: "End time must be after start time",
       });
     }
 
-    const [result] = await db.query(
-      `INSERT INTO events (title, description, start_time, end_time, created_by) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [title, description || null, start_time, end_time, req.user.id]
+    const result = await eventService.createEvent(
+      title,
+      description,
+      start_datetime,
+      end_datetime,
+      req.user.id
     );
 
     res.status(201).json({
@@ -152,11 +132,12 @@ const createEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, start_time, end_time } = req.body;
+    const { title, description, start_datetime, end_datetime } = req.body;
 
     // Check if event exists
-    const [existing] = await db.query("SELECT * FROM events WHERE id = ?", [id]);
-    if (existing.length === 0) {
+    const existing = await eventService.isExisting(id);
+
+    if (!existing || existing.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Event not found",
@@ -164,22 +145,14 @@ const updateEvent = async (req, res) => {
     }
 
     // Validation
-    if (end_time && start_time && new Date(end_time) <= new Date(start_time)) {
+    if (end_datetime && start_datetime && new Date(end_datetime) <= new Date(start_datetime)) {
       return res.status(400).json({
         success: false,
         message: "End time must be after start time",
       });
     }
 
-    await db.query(
-      `UPDATE events 
-       SET title = COALESCE(?, title),
-           description = COALESCE(?, description),
-           start_time = COALESCE(?, start_time),
-           end_time = COALESCE(?, end_time)
-       WHERE id = ?`,
-      [title, description, start_time, end_time, id]
-    );
+    await eventService.updateEvent(id, title, description, start_datetime, end_datetime);
 
     res.json({
       success: true,
@@ -200,15 +173,16 @@ const deleteEvent = async (req, res) => {
     const { id } = req.params;
 
     // Check if event exists
-    const [existing] = await db.query("SELECT * FROM events WHERE id = ?", [id]);
-    if (existing.length === 0) {
+    const existing = await eventService.isExisting(id);
+
+    if (!existing || existing.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Event not found",
       });
     }
 
-    await db.query("DELETE FROM events WHERE id = ?", [id]);
+    await eventService.deleteEvent(id);
 
     res.json({
       success: true,

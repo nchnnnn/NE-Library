@@ -1,11 +1,12 @@
-const db = require("../database");
+const sectionService = require("../services/sectionServices");
 
 // Get all sections
 const getAllSections = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT s.*, p.program_name, p.program_code, c.college_name FROM sections s JOIN programs p ON s.program_id = p.id JOIN colleges c ON p.college_id = c.id ORDER BY c.college_name, p.program_name, s.section_year, s.section_name",
-    );
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    
+    const rows = await sectionService.getAllSections(limit, offset);
     res.status(200).json({
       success: true,
       count: rows.length,
@@ -23,10 +24,10 @@ const getAllSections = async (req, res) => {
 const getSectionsByProgram = async (req, res) => {
   try {
     const { programId } = req.params;
-    const [rows] = await db.query(
-      "SELECT s.*, p.program_name, p.program_code FROM sections s JOIN programs p ON s.program_id = p.id WHERE s.program_id = ? ORDER BY s.section_year, s.section_name",
-      [programId],
-    );
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    
+    const rows = await sectionService.getSectionsByProgram(programId, limit, offset);
     res.status(200).json({
       success: true,
       count: rows.length,
@@ -44,12 +45,9 @@ const getSectionsByProgram = async (req, res) => {
 const getSectionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query(
-      "SELECT s.*, p.program_name, p.program_code, c.college_name FROM sections s JOIN programs p ON s.program_id = p.id JOIN colleges c ON p.college_id = c.id WHERE s.id = ?",
-      [id],
-    );
+    const section = await sectionService.getSectionById(id);
 
-    if (rows.length === 0) {
+    if (!section) {
       return res.status(404).json({
         success: false,
         message: "Section not found",
@@ -58,7 +56,7 @@ const getSectionById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: rows[0],
+      data: section,
     });
   } catch (error) {
     res.status(500).json({
@@ -71,36 +69,22 @@ const getSectionById = async (req, res) => {
 // Create new section
 const createSection = async (req, res) => {
   try {
-    const { program_id, section_name, section_year, academic_year, semester } =
-      req.body;
+    const { program_id, section_name, year_level } = req.body;
 
-    if (
-      !program_id ||
-      !section_name ||
-      !section_year ||
-      !academic_year ||
-      !semester
-    ) {
+    if (!program_id || !section_name || !year_level) {
       return res.status(400).json({
         success: false,
         message:
-          "Please provide program_id, section_name, section_year, academic_year, and semester",
+          "Please provide program_id, section_name, and year_level",
       });
     }
 
-    const [result] = await db.query(
-      "INSERT INTO sections (program_id, section_name, section_year, academic_year, semester) VALUES (?, ?, ?, ?, ?)",
-      [program_id, section_name, section_year, academic_year, semester],
-    );
-
-    const [newSection] = await db.query("SELECT * FROM sections WHERE id = ?", [
-      result.insertId,
-    ]);
+    const newSection = await sectionService.createSection(program_id, section_name, year_level);
 
     res.status(201).json({
       success: true,
       message: "Section created successfully",
-      data: newSection[0],
+      data: newSection,
     });
   } catch (error) {
     res.status(500).json({
@@ -114,77 +98,29 @@ const createSection = async (req, res) => {
 const updateSection = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      program_id,
-      section_name,
-      section_year,
-      academic_year,
-      semester,
-      status,
-    } = req.body;
+    const { program_id, section_name, year_level } = req.body;
 
-    const [existing] = await db.query("SELECT * FROM sections WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await sectionService.getSectionByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "Section not found",
       });
     }
 
-    const updates = [];
-    const values = [];
+    const updatedSection = await sectionService.updateSection(id, program_id, section_name, year_level);
 
-    if (program_id) {
-      updates.push("program_id = ?");
-      values.push(program_id);
-    }
-    if (section_name) {
-      updates.push("section_name = ?");
-      values.push(section_name);
-    }
-    if (section_year) {
-      updates.push("section_year = ?");
-      values.push(section_year);
-    }
-    if (academic_year) {
-      updates.push("academic_year = ?");
-      values.push(academic_year);
-    }
-    if (semester) {
-      updates.push("semester = ?");
-      values.push(semester);
-    }
-    if (status) {
-      updates.push("status = ?");
-      values.push(status);
-    }
-
-    if (updates.length === 0) {
+    if (!updatedSection) {
       return res.status(400).json({
         success: false,
         message: "No fields to update",
       });
     }
 
-    values.push(id);
-
-    await db.query(
-      `UPDATE sections SET ${updates.join(", ")} WHERE id = ?`,
-      values,
-    );
-
-    const [updatedSection] = await db.query(
-      "SELECT * FROM sections WHERE id = ?",
-      [id],
-    );
-
     res.status(200).json({
       success: true,
       message: "Section updated successfully",
-      data: updatedSection[0],
+      data: updatedSection,
     });
   } catch (error) {
     res.status(500).json({
@@ -199,18 +135,15 @@ const deleteSection = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [existing] = await db.query("SELECT * FROM sections WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await sectionService.getSectionByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "Section not found",
       });
     }
 
-    await db.query("DELETE FROM sections WHERE id = ?", [id]);
+    await sectionService.deleteSection(id);
 
     res.status(200).json({
       success: true,

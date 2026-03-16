@@ -6,7 +6,7 @@ const generateStudentNumber = async () => {
 
   // Get the last user's student_number to increment from
   const [lastUser] = await db.query(
-    "SELECT student_number FROM users ORDER BY id DESC LIMIT 1",
+    "SELECT student_number FROM students ORDER BY id DESC LIMIT 1",
   );
 
   let nextMiddle = 10001; // Default starting value

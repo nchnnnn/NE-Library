@@ -1,64 +1,76 @@
 const express = require("express");
 const route = express.Router();
-const userController = require("../controllers/userController");
+const studentController = require("../controllers/studentController");
 const {
   authenticateToken,
   requireAdmin,
   requireRole,
 } = require("../middleware/auth");
 
-// Public route - verify QR code for library entry (used by library kiosk)
-route.post("/library/verify", userController.verifyLibraryEntry);
 
 // Get all users - requires management or admin role (role_id 3 or 4)
 route.get(
-  "/users",
+  "/students",
   authenticateToken,
   requireRole(3, 4),
-  userController.getAllUsers,
+  studentController.getAllStudents,
+);
+
+route.get(
+  "/students/section/:section",
+  authenticateToken,
+  requireRole(3, 4),
+  studentController.getStudentsBySection,
+);
+
+route.get(
+  "/students/program/:program",
+  authenticateToken,
+  requireRole(3, 4),
+  studentController.getStudentsByProgram,
 );
 
 // Get single user by ID - requires authentication
-route.get("/users/:id", authenticateToken, userController.getUserById);
+route.get("/students/:id", authenticateToken, studentController.getStudentById);
 
 // Create user - requires admin or management (role_id 3 or 4)
 route.post(
-  "/users",
+  "/students",
   authenticateToken,
   requireRole(3, 4),
-  userController.createUser,
+  studentController.createStudent,
 );
 
 // Update user - requires admin or management (role_id 3 or 4)
 route.put(
-  "/users/:id",
+  "/students/:id",
   authenticateToken,
   requireRole(3, 4),
-  userController.updateUser,
+  studentController.updateStudent,
 );
 
 // Delete user - requires admin only (role_id 4)
 route.delete(
-  "/users/:id",
+  "/students/:id",
   authenticateToken,
   requireAdmin,
-  userController.deleteUser,
+  studentController.deleteStudent,
 );
 
 // Block user from library - requires librarian (role_id 2), management (role_id 3), or admin (role_id 4)
 route.post(
-  "/users/:id/block",
+  "/students/:id/block",
   authenticateToken,
   requireRole(2, 3, 4),
-  userController.blockUser,
+  studentController.blockStudent,
 );
 
 // Unblock user - requires librarian (role_id 2), management (role_id 3), or admin (role_id 4)
 route.post(
-  "/users/:id/unblock",
+  "/students/:id/unblock",
   authenticateToken,
   requireRole(2, 3, 4),
-  userController.unblockUser,
+  studentController.unblockStudent,
 );
 
 module.exports = route;

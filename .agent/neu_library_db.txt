@@ -1,0 +1,626 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3307
+-- Generation Time: Mar 15, 2026 at 04:24 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `neu_library_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_logs`
+--
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_type` enum('student','staff','admin') DEFAULT NULL,
+  `identifier` varchar(100) DEFAULT NULL,
+  `action_type` enum('account_created','account_updated','account_deleted','blocked_entry','status_changed','login_failed') NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `activity_logs`
+--
+
+INSERT INTO `activity_logs` (`id`, `user_id`, `user_type`, `identifier`, `action_type`, `description`, `created_at`) VALUES
+(1, 1, NULL, NULL, 'blocked_entry', 'Test lang', '2026-03-13 09:41:55');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance_logs`
+--
+
+CREATE TABLE `attendance_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `time_in` datetime DEFAULT NULL,
+  `remarks` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `attendance_logs`
+--
+
+INSERT INTO `attendance_logs` (`id`, `user_id`, `time_in`, `remarks`) VALUES
+(35, 39, '2026-03-13 17:08:25', 'Library entry allowed'),
+(36, 39, '2026-03-13 17:08:26', 'Library entry allowed'),
+(37, 39, '2026-03-13 17:40:44', 'Library entry allowed'),
+(38, 9, '2026-03-13 17:41:09', 'Staff attendance recorded'),
+(39, 1, '2026-03-14 00:34:44', 'Library entry allowed'),
+(40, 1, '2026-03-14 00:34:45', 'Library entry allowed'),
+(41, 1, '2026-03-14 00:34:45', 'Library entry allowed'),
+(42, 1, '2026-03-14 00:34:46', 'Library entry allowed'),
+(43, 1, '2026-03-14 00:53:05', 'Library entry allowed');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `colleges`
+--
+
+CREATE TABLE `colleges` (
+  `id` int(11) NOT NULL,
+  `college_name` varchar(150) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `colleges`
+--
+
+INSERT INTO `colleges` (`id`, `college_name`, `created_at`) VALUES
+(1, 'College of Accountancy', '2026-03-06 06:07:07'),
+(2, 'College of Agriculture', '2026-03-06 06:07:07'),
+(3, 'College of Arts and Science', '2026-03-06 06:07:07'),
+(4, 'College of Business Administration', '2026-03-06 06:07:07'),
+(5, 'College of Communication', '2026-03-06 06:07:07'),
+(6, 'College of Informatics and Computing Studies', '2026-03-06 06:07:07'),
+(7, 'College of Criminology', '2026-03-06 06:07:07'),
+(8, 'College of Education', '2026-03-06 06:07:07'),
+(9, 'College of Engineering and Architecture', '2026-03-06 06:07:07'),
+(10, 'College of Medical Technology', '2026-03-06 06:07:07'),
+(11, 'College of Midwifery', '2026-03-06 06:07:07'),
+(12, 'College of Music', '2026-03-06 06:07:07'),
+(13, 'College of Nursing', '2026-03-06 06:07:07'),
+(14, 'College of Physical Therapy', '2026-03-06 06:07:07'),
+(15, 'College of Respiratory Therapy', '2026-03-06 06:07:07'),
+(16, 'College of Law', '2026-03-06 06:07:07'),
+(17, 'College of Medicine', '2026-03-06 06:07:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `title`, `description`, `start_datetime`, `end_datetime`, `created_by`, `created_at`) VALUES
+(2, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 10:38:01'),
+(3, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 10:39:15'),
+(4, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 11:06:42'),
+(5, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 11:06:46'),
+(6, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 11:06:47'),
+(7, 'Library Exhibit', 'Library Exhibit', '2026-03-20 09:00:00', '2026-03-20 12:00:00', 3, '2026-03-13 11:06:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `library_sessions`
+--
+
+CREATE TABLE `library_sessions` (
+  `id` int(11) NOT NULL,
+  `session_date` date NOT NULL,
+  `open_time` datetime NOT NULL,
+  `close_time` datetime DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `status` enum('open','closed') DEFAULT 'open',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL,
+  `permission_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`id`, `permission_name`, `description`) VALUES
+(1, 'scan_qr', 'Scan QR for attendance'),
+(2, 'view_own_attendance', 'View personal attendance'),
+(3, 'open_session', 'Open library session'),
+(4, 'close_session', 'Close library session'),
+(5, 'view_all_attendance', 'View all attendance logs'),
+(6, 'export_reports', 'Export attendance reports'),
+(7, 'manage_users', 'Create and manage users'),
+(8, 'assign_roles', 'Assign roles'),
+(9, 'block_user', 'Block a user from entering library');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `programs`
+--
+
+CREATE TABLE `programs` (
+  `id` int(11) NOT NULL,
+  `college_id` int(11) NOT NULL,
+  `program_code` varchar(20) NOT NULL,
+  `program_name` varchar(150) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `programs`
+--
+
+INSERT INTO `programs` (`id`, `college_id`, `program_code`, `program_name`, `created_at`) VALUES
+(1, 6, 'BSIT', 'Bachelor of Science in Information Technology', '2026-03-06 06:07:07'),
+(2, 6, 'BSCS', 'Bachelor of Science in Computer Science', '2026-03-06 06:07:07'),
+(3, 6, 'BSIS', 'Bachelor of Science in Information Systems', '2026-03-06 06:07:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL,
+  `role_name` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `role_name`, `description`, `created_at`) VALUES
+(1, 'student', 'Library visitor student', '2026-03-04 09:57:13'),
+(2, 'librarian', 'Library staff', '2026-03-04 09:57:13'),
+(3, 'management', 'School management', '2026-03-04 09:57:13'),
+(4, 'admin', 'System administrator', '2026-03-04 09:57:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+CREATE TABLE `role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+(1, 1),
+(1, 2),
+(2, 1),
+(2, 3),
+(2, 4),
+(2, 5),
+(2, 9),
+(3, 1),
+(3, 2),
+(3, 3),
+(3, 4),
+(3, 5),
+(3, 6),
+(3, 7),
+(3, 8),
+(3, 9),
+(4, 1),
+(4, 2),
+(4, 3),
+(4, 4),
+(4, 5),
+(4, 6),
+(4, 7),
+(4, 8),
+(4, 9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sections`
+--
+
+CREATE TABLE `sections` (
+  `id` int(11) NOT NULL,
+  `program_id` int(11) NOT NULL,
+  `section_name` varchar(20) NOT NULL,
+  `year_level` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sections`
+--
+
+INSERT INTO `sections` (`id`, `program_id`, `section_name`, `year_level`, `created_at`) VALUES
+(1, 1, '1BSIT-1', 1, '2026-03-13 03:59:38'),
+(2, 1, '1BSIT-2', 1, '2026-03-13 03:59:38'),
+(3, 1, '1BSIT-3', 1, '2026-03-13 03:59:38'),
+(4, 1, '1BSIT-4', 1, '2026-03-13 03:59:38'),
+(5, 1, '2BSIT-1', 2, '2026-03-13 03:59:38'),
+(6, 1, '2BSIT-2', 2, '2026-03-13 03:59:38'),
+(7, 1, '2BSIT-3', 2, '2026-03-13 03:59:38'),
+(8, 1, '2BSIT-4', 2, '2026-03-13 03:59:38'),
+(9, 1, '3BSIT-1', 3, '2026-03-13 03:59:38'),
+(10, 1, '3BSIT-2', 3, '2026-03-13 03:59:38'),
+(11, 1, '3BSIT-3', 3, '2026-03-13 03:59:38'),
+(12, 1, '3BSIT-4', 3, '2026-03-13 03:59:38'),
+(13, 1, '4BSIT-1', 4, '2026-03-13 03:59:38'),
+(14, 1, '4BSIT-2', 4, '2026-03-13 03:59:38'),
+(15, 1, '4BSIT-3', 4, '2026-03-13 03:59:38'),
+(16, 1, '4BSIT-4', 4, '2026-03-13 03:59:38'),
+(17, 2, '1BSCS-1', 1, '2026-03-13 03:59:38'),
+(18, 2, '1BSCS-2', 1, '2026-03-13 03:59:38'),
+(19, 2, '1BSCS-3', 1, '2026-03-13 03:59:38'),
+(20, 2, '1BSCS-4', 1, '2026-03-13 03:59:38'),
+(21, 2, '2BSCS-1', 2, '2026-03-13 03:59:38'),
+(22, 2, '2BSCS-2', 2, '2026-03-13 03:59:38'),
+(23, 2, '2BSCS-3', 2, '2026-03-13 03:59:38'),
+(24, 2, '2BSCS-4', 2, '2026-03-13 03:59:38'),
+(25, 2, '3BSCS-1', 3, '2026-03-13 03:59:38'),
+(26, 2, '3BSCS-2', 3, '2026-03-13 03:59:38'),
+(27, 2, '3BSCS-3', 3, '2026-03-13 03:59:38'),
+(28, 2, '3BSCS-4', 3, '2026-03-13 03:59:38'),
+(29, 2, '4BSCS-1', 4, '2026-03-13 03:59:38'),
+(30, 2, '4BSCS-2', 4, '2026-03-13 03:59:38'),
+(31, 2, '4BSCS-3', 4, '2026-03-13 03:59:38'),
+(32, 2, '4BSCS-4', 4, '2026-03-13 03:59:38'),
+(33, 3, '1BSIS-1', 1, '2026-03-13 03:59:38'),
+(34, 3, '1BSIS-2', 1, '2026-03-13 03:59:38'),
+(35, 3, '1BSIS-3', 1, '2026-03-13 03:59:38'),
+(36, 3, '1BSIS-4', 1, '2026-03-13 03:59:38'),
+(37, 3, '2BSIS-1', 2, '2026-03-13 03:59:38'),
+(38, 3, '2BSIS-2', 2, '2026-03-13 03:59:38'),
+(39, 3, '2BSIS-3', 2, '2026-03-13 03:59:38'),
+(40, 3, '2BSIS-4', 2, '2026-03-13 03:59:38'),
+(41, 3, '3BSIS-1', 3, '2026-03-13 03:59:38'),
+(42, 3, '3BSIS-2', 3, '2026-03-13 03:59:38'),
+(43, 3, '3BSIS-3', 3, '2026-03-13 03:59:38'),
+(44, 3, '3BSIS-4', 3, '2026-03-13 03:59:38'),
+(45, 3, '4BSIS-1', 4, '2026-03-13 03:59:38'),
+(46, 3, '4BSIS-2', 4, '2026-03-13 03:59:38'),
+(47, 3, '4BSIS-3', 4, '2026-03-13 03:59:38'),
+(48, 3, '4BSIS-4', 4, '2026-03-13 03:59:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_users`
+--
+
+CREATE TABLE `staff_users` (
+  `id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `employee_id` varchar(50) DEFAULT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `qr_code` varchar(255) DEFAULT NULL,
+  `status` enum('active','inactive','suspended') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `staff_users`
+--
+
+INSERT INTO `staff_users` (`id`, `role_id`, `employee_id`, `first_name`, `last_name`, `email`, `password`, `qr_code`, `status`, `created_at`, `updated_at`) VALUES
+(3, 4, 'EMP-261000', 'System', 'Administrator', 'admin@neu.edu.ph\r\n', '$2a$10$vKBMPEaeWCxbAlH8IzkfRea8g9IZGng4Rsp8hDKZ0pdKTArL2zpgm', '84f2fe55-17b0-11f1-8850-107b44a0b4fd', 'active', '2026-03-06 08:53:14', '2026-03-13 07:46:14'),
+(9, 3, 'EMP-261001', 'System', 'Management', 'system.management@neu.edu.ph', '$2a$10$96WqYyc/f06t5jmKOjLH2.r8zb9Rf/rPtZwleZc.sroTXDmGa.e/i', '7bcb24af-8902-4d36-945a-f0c1abff5e00', 'active', '2026-03-13 06:57:47', '2026-03-13 07:55:35'),
+(10, 2, 'EMP-261002', 'Librarian', 'Staff', 'librarian.staff@neu.edu.ph', '$2a$10$05hdJvQPwr/CnwP6XfNwKeWZsjJ16w0BrsAqQ6WW8kqIQZ5zfmS9K', '421dce77-41f7-4478-87cb-20f3b5f52d4b', 'active', '2026-03-13 06:58:23', '2026-03-13 06:58:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students`
+--
+
+CREATE TABLE `students` (
+  `id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL DEFAULT 1,
+  `student_number` varchar(50) DEFAULT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `qr_code` varchar(255) NOT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `section_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`id`, `role_id`, `student_number`, `first_name`, `last_name`, `email`, `password`, `qr_code`, `status`, `created_at`, `section_id`) VALUES
+(1, 1, '26-10001-001', 'Christian', 'Leocario', 'christian.leocario@neu.edu.ph', NULL, '84f2f87a-17b0-11f1-8850-107b44a0b4fd', 'active', '2026-03-04 09:57:13', 1),
+(39, 1, '26-00001-002', 'James', 'Smith', 'james.smith@neu.edu.ph', '$2a$10$gOl5N4Ab6EevfHRQqfdgrussClkHPPnERWGrSyp5vT3DPlZbUMfC.', 'd9516515-a8ea-4580-ab2b-a3e11d9ac2a5', 'active', '2026-03-13 05:46:59', 1),
+(40, 1, '26-00001-003', 'Mary', 'Johnson', 'mary.johnson@neu.edu.ph', '$2a$10$A4JYKVD2ByzYsAX/.J40MexF8v4Q6KbCcNgOSixIVqIfRtNIQitZu', '8b0ee0b6-406b-4156-be26-c01569046132', 'active', '2026-03-13 05:47:22', 2),
+(41, 1, '26-00001-004', 'John', 'Williams', 'john.williams@neu.edu.ph', '$2a$10$X2Out4QsaRsRhRlDWEhNS.16KMt6fX29qiGY5nkwdwk3EMNn/3s5u', '2d30028a-a619-453f-9442-c7f36c7359f1', 'active', '2026-03-13 05:47:22', 3),
+(42, 1, '26-00001-005', 'Patricia', 'Brown', 'patricia.brown@neu.edu.ph', '$2a$10$sqFHhM6IF1WbeGLtz7d2zuB/UXrU4aQFL/zDb0NA/vfLYVlIrUcDC', 'bf2a49ec-5add-484d-ac48-5677247fbc8c', 'active', '2026-03-13 05:47:22', 4),
+(43, 1, '26-00001-006', 'Robert', 'Jones', 'robert.jones@neu.edu.ph', '$2a$10$9scLGaWnOMVGYQULAcDBd.RpVwcYN9CvnjQjGcSr8TEIywhEXBwcK', 'e043ffff-7ee7-4fcd-bcdd-f5e665c2f80e', 'active', '2026-03-13 05:47:22', 5),
+(44, 1, '26-00001-007', 'Jennifer', 'Garcia', 'jennifer.garcia@neu.edu.ph', '$2a$10$qJE9lwCY9HZ2uvPgDP4F9eACm7JfXWj5BdYdCl.h5uvp84iTFQY4e', 'd3dd4986-ee3b-4bc6-a427-613faaf285b1', 'active', '2026-03-13 05:47:22', 6),
+(45, 1, '26-00001-008', 'Michael', 'Miller', 'michael.miller@neu.edu.ph', '$2a$10$xNxMj.9YoNY4bZM2MDQxfeQxsk.gL2b1k1LP1ybncz8osHWtBzlJy', '6140ed2c-d66b-49bb-a46c-49c10a843c43', 'active', '2026-03-13 05:47:50', 7),
+(46, 1, '26-00001-009', 'Linda', 'Davis', 'linda.davis@neu.edu.ph', '$2a$10$h24NevcSysVwBfxD2Q..AOK7zSWKrpqYDR/YeC5.oB.bPG4l95Rau', '8da0a0ea-b2b6-40a9-853e-b63d2c9641fb', 'active', '2026-03-13 05:47:50', 8),
+(47, 1, '26-00001-010', 'William', 'Rodriguez', 'william.rodriguez@neu.edu.ph', '$2a$10$qrZLkHvYbYd2UYXXYGYVmOSVA3CK4.8.3FKEPxKAEYh59TuRr/dBu', 'eb89c10f-3c03-40be-b4fc-d549fe0f32f0', 'active', '2026-03-13 05:47:50', 9),
+(48, 1, '26-00001-011', 'Elizabeth', 'Martinez', 'elizabeth.martinez@neu.edu.ph', '$2a$10$Pa27kXa/bofT1/Tjp97N8eMObCxAA0pajw8lbQQRRwVJv/53OSnCq', '2a8265c7-3b70-4f42-91bc-ad8045bf179f', 'active', '2026-03-13 05:47:50', 10),
+(49, 1, '26-00001-012', 'David', 'Hernandez', 'david.hernandez@neu.edu.ph', '$2a$10$Ifolr3UYV95UyPLHUUA7C.jTOxusGubq9/ZQNIqywOUM2PsQXH29i', 'dd92bda7-4c4b-49bf-ba91-a7ab5db57bfe', 'active', '2026-03-13 05:47:50', 11),
+(50, 1, '26-00001-013', 'Barbara', 'Lopez', 'barbara.lopez@neu.edu.ph', '$2a$10$HV3IdgyHeg/YzcbgixaIAe6T52P25RFVnE01s1Agn9uYBXDiuMYjy', '94923521-6b48-4aa9-8cdd-b4323b9f182c', 'active', '2026-03-13 05:47:50', 12),
+(51, 1, '26-00001-014', 'Richard', 'Gonzalez', 'richard.gonzalez@neu.edu.ph', '$2a$10$L7K3bVjJ1AX2iUiwHdlc5u8YI9bmtyi//EwZOPGAyJ.rPEXdfNjTS', '4c5f414d-bb5e-479c-a4fc-8a8be00df020', 'active', '2026-03-13 05:47:50', 13),
+(52, 1, '26-00001-015', 'Susan', 'Wilson', 'susan.wilson@neu.edu.ph', '$2a$10$7U6m3V.LowaWbCifKGuQteTAdotOvG6hdhLPjRXeSCqIUx1tWqn2G', '78a30c56-df61-4a25-bc40-583d61b7f2aa', 'active', '2026-03-13 05:47:50', 14),
+(53, 1, '26-00001-016', 'Joseph', 'Anderson', 'joseph.anderson@neu.edu.ph', '$2a$10$xRPV5wbn2GhHYbbdXgJHDuVJ4KEMUpm72y2icNfbvUe9s/HvHnWmy', 'e21a0685-d574-46b8-821c-2458aca2aab5', 'active', '2026-03-13 05:47:50', 15),
+(54, 1, '26-00001-017', 'Jessica', 'Thomas', 'jessica.thomas@neu.edu.ph', '$2a$10$Lsah4mBGLwwatDpqGfLCq.GN5WDgterk6ljRLzZ1CrJSmTuKw2uZ6', '852d332b-ec6c-4683-aaea-09f96735b10e', 'active', '2026-03-13 05:47:50', 16),
+(55, 1, '26-00001-018', 'Thomas', 'Taylor', 'thomas.taylor@neu.edu.ph', '$2a$10$w64wOJg45y9yW6urUYQYqOCSid3MtrAkog6pkor5epkyejpJerB2K', '6f478ec4-e83f-4929-81e0-f296cfb0bdaf', 'active', '2026-03-13 05:47:50', 17),
+(56, 1, '26-00001-019', 'Sarah', 'Moore', 'sarah.moore@neu.edu.ph', '$2a$10$U0AnWJlsn82FMrAiGPr41eQG3OrM7hXxlcyHGTliViZOfQwQQP2.y', '1af87878-2509-4517-a05a-8a36b6daba5a', 'active', '2026-03-13 05:47:50', 18),
+(57, 1, '26-00001-020', 'Charles', 'Jackson', 'charles.jackson@neu.edu.ph', '$2a$10$CvDqJp1gH9K2oY1s1ndVbeiPIb9Vjad4ZvApaCsxZSZ9hPIGE6aV2', 'fbb80160-d9e8-4818-a28f-a048ea48ca09', 'active', '2026-03-13 05:47:50', 19),
+(58, 1, '26-00001-021', 'Karen', 'Martin', 'karen.martin@neu.edu.ph', '$2a$10$oxqRm0gSUjZ3xfa6SyIrbu9Wzcxdg2n9qAHXUeQ00xbdQMw28p9H.', '5e0954e8-44b7-4e77-aa2a-db994107f9a6', 'active', '2026-03-13 05:47:50', 20),
+(59, 1, '26-00002-022', 'Hazel Joy', 'Escal', 'hazel joy.escal@neu.edu.ph', '$2a$10$IRKUECTONavMSbzC3JSRjO/G5sfKMacMvNJBorUoEBNhQmJW3lWry', '72d32d04-464c-4bde-83db-22ff6fc97330', 'active', '2026-03-13 07:07:59', 1),
+(60, 1, '26-00003-023', 'John Timothy', 'Gandeza', 'john timothy.gandeza@neu.edu.ph', '$2a$10$km71ECZD2D/9QJiixVymyOo2MojVy3/YIZFLWZH4sw7cSbPS5yDaa', '25f06e30-e6d6-4531-83f8-338a71920f41', 'active', '2026-03-13 07:50:07', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_blocks`
+--
+
+CREATE TABLE `user_blocks` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `blocked_by` int(11) NOT NULL,
+  `reason` text NOT NULL,
+  `blocked_at` datetime DEFAULT current_timestamp(),
+  `unblock_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_blocks`
+--
+
+INSERT INTO `user_blocks` (`id`, `user_id`, `blocked_by`, `reason`, `blocked_at`, `unblock_at`) VALUES
+(5, 1, 2, 'Test lang', '2026-03-06 21:19:33', '2026-03-06 21:19:49'),
+(6, 2, 2, 'Test lang', '2026-03-06 21:21:32', NULL),
+(7, 1, 2, 'Test lang', '2026-03-06 21:21:36', '2026-03-06 21:23:11'),
+(8, 1, 2, 'Test lang', '2026-03-06 21:44:34', '2026-03-13 17:45:17'),
+(9, 3, 3, 'qweqw', '2026-03-12 18:44:26', NULL);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_type` (`user_type`),
+  ADD KEY `idx_action_type` (`action_type`),
+  ADD KEY `idx_identifier` (`identifier`);
+
+--
+-- Indexes for table `attendance_logs`
+--
+ALTER TABLE `attendance_logs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `colleges`
+--
+ALTER TABLE `colleges`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `college_name` (`college_name`);
+
+--
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
+-- Indexes for table `library_sessions`
+--
+ALTER TABLE `library_sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
+-- Indexes for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `permission_name` (`permission_name`);
+
+--
+-- Indexes for table `programs`
+--
+ALTER TABLE `programs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `college_id` (`college_id`);
+
+--
+-- Indexes for table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `role_name` (`role_name`);
+
+--
+-- Indexes for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD PRIMARY KEY (`role_id`,`permission_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
+-- Indexes for table `sections`
+--
+ALTER TABLE `sections`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_section` (`program_id`,`section_name`);
+
+--
+-- Indexes for table `staff_users`
+--
+ALTER TABLE `staff_users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `employee_id` (`employee_id`),
+  ADD UNIQUE KEY `qr_code` (`qr_code`),
+  ADD KEY `role_id` (`role_id`),
+  ADD KEY `idx_employee_id` (`employee_id`),
+  ADD KEY `idx_email` (`email`);
+
+--
+-- Indexes for table `students`
+--
+ALTER TABLE `students`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `qr_code` (`qr_code`),
+  ADD UNIQUE KEY `student_number` (`student_number`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `role_id` (`role_id`),
+  ADD KEY `fk_user_section` (`section_id`);
+
+--
+-- Indexes for table `user_blocks`
+--
+ALTER TABLE `user_blocks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `blocked_by` (`blocked_by`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `attendance_logs`
+--
+ALTER TABLE `attendance_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+
+--
+-- AUTO_INCREMENT for table `colleges`
+--
+ALTER TABLE `colleges`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `library_sessions`
+--
+ALTER TABLE `library_sessions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `permissions`
+--
+ALTER TABLE `permissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `programs`
+--
+ALTER TABLE `programs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `sections`
+--
+ALTER TABLE `sections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+
+--
+-- AUTO_INCREMENT for table `staff_users`
+--
+ALTER TABLE `staff_users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `students`
+--
+ALTER TABLE `students`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+
+--
+-- AUTO_INCREMENT for table `user_blocks`
+--
+ALTER TABLE `user_blocks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

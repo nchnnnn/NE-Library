@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEU Library - Staff Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/fontawesome.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <script src="https://kit.fontawesome.com/6784bf96c5.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/portal.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Animated Background -->
+    <div class="login-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
+
+    <div class="portal-wrapper">
+        <!-- Collapsible Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h2>NEU Library</h2>
+                        <p>Staff Portal</p>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Attendance Section -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle" data-group="attendance">
+                        <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+                        <span class="nav-text">Attendance</span>
+                        <span class="nav-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                    </button>
+                    <div class="nav-group-items" id="group-attendance">
+                        <button class="nav-btn active" data-target="view-dashboard">
+                            <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
+                            <span class="nav-text">Dashboard</span>
+                            <span class="tooltip">Dashboard</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-statistics">
+                            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+                            <span class="nav-text">Statistics</span>
+                            <span class="tooltip">Statistics</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Management Section -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle" data-group="data">
+                        <span class="nav-icon"><i class="fa-solid fa-database"></i></span>
+                        <span class="nav-text">Data</span>
+                        <span class="nav-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                    </button>
+                    <div class="nav-group-items" id="group-data">
+                        <button class="nav-btn" data-target="view-students">
+                            <span class="nav-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                            <span class="nav-text">Students</span>
+                            <span class="tooltip">Students</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-staff">
+                            <span class="nav-icon"><i class="fa-solid fa-user-tie"></i></span>
+                            <span class="nav-text">Staff</span>
+                            <span class="tooltip">Staff</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-events">
+                            <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                            <span class="nav-text">Events</span>
+                            <span class="tooltip">Events</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-logs">
+                            <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+                            <span class="nav-text">Logs</span>
+                            <span class="tooltip">Logs</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Management Section (Admin Only) -->
+                <div class="nav-group admin-only" id="admin-section" style="display: none;">
+                    <button class="nav-group-toggle" data-group="management">
+                        <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+                        <span class="nav-text">Management</span>
+                        <span class="nav-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                    </button>
+                    <div class="nav-group-items" id="group-management">
+                        <button class="nav-btn" data-target="view-users">
+                            <span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>
+                            <span class="nav-text">User Management</span>
+                            <span class="tooltip">User Management</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-colleges">
+                            <span class="nav-icon"><i class="fa-solid fa-building"></i></span>
+                            <span class="nav-text">Colleges</span>
+                            <span class="tooltip">Colleges</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-programs">
+                            <span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                            <span class="nav-text">Programs</span>
+                            <span class="tooltip">Programs</span>
+                        </button>
+                        <button class="nav-btn" data-target="view-sections">
+                            <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+                            <span class="nav-text">Sections</span>
+                            <span class="tooltip">Sections</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="nav-btn btn-logout" id="btn-logout">
+                    <span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                    <span class="nav-text">Logout</span>
+                    <span class="tooltip">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="portal-main">
+            <header class="portal-header">
+                <div class="header-user">
+                    <div class="user-avatar" id="user-avatar">AD</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-name">Loading...</div>
+                        <div class="user-role" id="user-role">Role</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <section class="view-section active" id="view-dashboard">
+                <div class="page-header">
+                    <h2>Dashboard Overview</h2>
+                    <p>Real-time library statistics and activity</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-total">0</div>
+                            <div class="stat-label">Total Visitors</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-today">0</div>
+                            <div class="stat-label">Today's Visitors</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-students">0</div>
+                            <div class="stat-label">Students Registered</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                            <i class="fa-solid fa-user-slash"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value stat-value--blocked" id="stat-blocked">0</div>
+                            <div class="stat-label">Blocked Users</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">Recent Activity</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('dash-logs-table', 'Dashboard')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('dash-logs-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                            <a href="#" class="view-all-btn" onclick="switchView('view-logs'); return false;">View All <i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="table-filters">
+                        <div class="filter-group">
+                            <div class="filter-input-wrapper">
+                                <input type="text" id="search-name" placeholder="Search by Name or ID..." class="filter-input">
+                                <button class="filter-clear-btn" id="clear-search" title="Clear search"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-input-wrapper">
+                                <input type="text" id="filter-college" placeholder="Filter by College..." class="filter-input" list="college-list">
+                                <button class="filter-clear-btn" id="clear-college" title="Clear college"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <datalist id="college-list"></datalist>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-input-wrapper">
+                                <input type="text" id="filter-role" placeholder="Filter by Role..." class="filter-input" list="role-list">
+                                <button class="filter-clear-btn" id="clear-role" title="Clear role"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <datalist id="role-list">
+                                <option value="student">
+                                <option value="staff">
+                            </datalist>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="clear-all-filters" title="Clear all filters">
+                            <i class="fa-solid fa-filter-circle-xmark"></i> Clear All
+                        </button>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="dash-logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Name / ID</th>
+                                    <th>Program / College</th>
+                                    <th>Role</th>
+                                    <th>Date / Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics View -->
+            <section class="view-section" id="view-statistics">
+                <div class="page-header">
+                    <h2>Statistics</h2>
+                    <p>Library attendance analytics and trends</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-stats-total">0</div>
+                            <div class="stat-label">Total Visitors</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-stats-today">0</div>
+                            <div class="stat-label">Today's Visitors</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                            <i class="fa-solid fa-calendar-week"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-stats-week">0</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+                            <i class="fa-solid fa-calendar-month"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-stats-month">0</div>
+                            <div class="stat-label">This Month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Attendance Trend</h3>
+                        <div class="chart-period">
+                            <button class="period-btn active" data-period="today">Today</button>
+                            <button class="period-btn" data-period="week">Week</button>
+                            <button class="period-btn" data-period="month">Month</button>
+                            <button class="period-btn" data-period="year">Year</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="attendance-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Students View -->
+            <section class="view-section" id="view-students">
+                <div class="page-header">
+                    <h2>Student Management</h2>
+                    <p>View and manage registered students</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Students</h3>
+                        <div class="table-actions">
+                            <span class="table-count" id="students-count">Total: 0</span>
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('students-table', 'Students')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('students-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="students-table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Student No.</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Section</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Staff View -->
+            <section class="view-section" id="view-staff">
+                <div class="page-header">
+                    <h2>Staff Management</h2>
+                    <p>View and manage registered staff members</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Staff</h3>
+                        <div class="table-actions">
+                            <span class="table-count" id="staff-count">Total: 0</span>
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('staff-table', 'Staff')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('staff-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="staff-table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Employee No.</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Events View -->
+            <section class="view-section" id="view-events">
+                <div class="page-header">
+                    <h2>Event Management</h2>
+                    <p>View and manage library events</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Events</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('events-table', 'Events')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('events-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="events-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Starts</th>
+                                    <th>Ends</th>
+                                    <th>Creator</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs View -->
+            <section class="view-section" id="view-logs">
+                <div class="page-header">
+                    <h2>Attendance Logs</h2>
+                    <p>View all library entry and exit records</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">Full Logs</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('logs-table', 'Logs')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('logs-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Management View (Admin Only) -->
+            <section class="view-section" id="view-users">
+                <div class="page-header">
+                    <h2>User Management</h2>
+                    <p>Manage staff users and assign roles</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Staff Users</h3>
+                        <div class="table-actions">
+                            <span class="table-count" id="users-count">Total: 0</span>
+                            <button class="btn btn-sm btn-primary" onclick="showAddUserModal()" title="Add New User">
+                                <i class="fa-solid fa-plus"></i> Add User
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('users-table', 'Users')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printTable('users-table')" title="Print">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Employee No.</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Colleges View (Admin Only) -->
+            <section class="view-section" id="view-colleges">
+                <div class="page-header">
+                    <h2>Colleges Management</h2>
+                    <p>Manage colleges in the system</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Colleges</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-primary" onclick="showAddCollegeModal()" title="Add New College">
+                                <i class="fa-solid fa-plus"></i> Add College
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="colleges-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>College Code</th>
+                                    <th>College Name</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Programs View (Admin Only) -->
+            <section class="view-section" id="view-programs">
+                <div class="page-header">
+                    <h2>Programs Management</h2>
+                    <p>Manage programs in the system</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Programs</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-primary" onclick="showAddProgramModal()" title="Add New Program">
+                                <i class="fa-solid fa-plus"></i> Add Program
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="programs-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Program Code</th>
+                                    <th>Program Name</th>
+                                    <th>College</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sections View (Admin Only) -->
+            <section class="view-section" id="view-sections">
+                <div class="page-header">
+                    <h2>Sections Management</h2>
+                    <p>Manage sections in the system</p>
+                </div>
+
+                <div class="table-card glass-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Sections</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-primary" onclick="showAddSectionModal()" title="Add New Section">
+                                <i class="fa-solid fa-plus"></i> Add Section
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="sections-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Section Name</th>
+                                    <th>Program</th>
+                                    <th>Year Level</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/portal.js"></script>
+</body>
+</html>

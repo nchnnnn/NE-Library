@@ -3,9 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Era Library</title>
+    <title>NEU Library Visitor Log</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/kiosk.css">
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
-    <h1>This is New Era Library</h1>
+
+    <!-- Animated Background -->
+    <div class="login-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" style="position: relative; z-index: 10;">
+
+        <!-- Left Slider -->
+        <div class="slider-container" id="ad-slider">
+            <div class="slide active slide-1"></div>
+            <div class="slide slide-2"></div>
+            <div class="slide slide-3"></div>
+
+            <div class="slider-overlay">
+                <h1>Welcome to NEU</h1>
+                <p>Excellence in academic research.</p>
+            </div>
+
+            <div class="slider-controls">
+                <button class="control-btn" id="prev-slide"><</button>
+                <button class="control-btn" id="next-slide">></button>
+            </div>
+
+            <div class="slider-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <!-- Right Entry Card -->
+        <div class="card-wrapper">
+            <div class="entry-card">
+                <div class="clock-container">
+                    <div>
+                        <div class="clock-time" id="live-time">00:00:00 AM</div>
+                        <div class="clock-date" id="live-date">Loading date...</div>
+                    </div>
+                    <div class="library-hours-wrap">
+                        <div class="library-hours-label">Library Hours<br>08:00 AM - 7:00 PM</div>
+                    </div>
+                </div>
+
+                <h2>Library Access</h2>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-target="tab-auto">ID / QR Scan</button>
+                    <button class="tab-btn" data-target="tab-login">Account</button>
+                </div>
+
+                <!-- Tab 1: Merged Scanner & ID -->
+                <div class="tab-content active" id="tab-auto">
+                    <div class="scanner-container">
+                        <video id="qr-video" playsinline disablePictureInPicture></video>
+                        <div class="scan-target">
+                            <div class="bottom-brackets"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                        <canvas id="qr-canvas" class="hidden"></canvas>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Manual ID Entry</label>
+                        <div class="manual-id-row">
+                            <input type="text" value="26-00001-003" id="manual-student-id" placeholder="Student or Staff ID" class="flex-1">
+                            <button class="btn btn-primary btn-submit-id" id="btn-submit-id">Log In</button>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Tab 2: student account login -->
+                <div class="tab-content" id="tab-login">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="manual-email" placeholder="student@neu.edu.ph">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="manual-password" placeholder="••••••••">
+                    </div>
+                    <button class="btn btn-primary w-100 btn-verify" id="btn-submit-login">Verify Entry</button>
+                
+                </div>
+
+                <div class="admin-access">
+                    <a href="/login" class="admin-link">Staff / Admin Access →</a>
+                </div>
+
+            </div>
+            
+        </div>
+
+    </div>
+
+    <!-- Details Modal Overlay (Success/Error) -->
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div id="modal-icon" class="modal-icon-wrap"></div>
+            <h2 id="modal-title" class="modal-title"></h2>
+            <div id="modal-message" class="modal-message"></div>
+
+            <div id="modal-details" class="modal-details">
+                <div class="m-identity">
+                    <div id="m-avatar" class="m-avatar"></div>
+                    <h3 id="m-name" class="m-name"></h3>
+                    <div id="m-id" class="m-id-badge"></div>
+                </div>
+
+                <div class="m-divider"></div>
+
+                <div class="m-visit">
+                    <div class="m-visit-grid">
+                        <div class="m-field">
+                            <div class="m-field-label">College / Section</div>
+                            <div id="m-dept" class="m-field-value"></div>
+                        </div>
+                        <div class="m-field">
+                            <div class="m-field-label">Purpose of Visit</div>
+                            <div id="m-purpose" class="m-field-value m-field-value--purpose"></div>
+                        </div>
+                        <div class="m-field">
+                            <div class="m-field-label">Time of Entry</div>
+                            <div id="m-time" class="m-field-value"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-100 btn-modal-close" id="btn-modal-close">Close</button>
+        </div>
+    </div>
+
+    <!-- Purpose Confirmation Modal Overlay -->
+    <div class="modal-overlay" id="purpose-modal">
+        <div class="modal-content">
+            <div class="pm-header">
+                <h2>Entry Confirmation</h2>
+                <p>Confirm your identity and the purpose of your visit.</p>
+            </div>
+
+            <div class="pm-section">
+                <div class="pm-section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Profile Information
+                </div>
+                <div class="pm-profile-grid">
+                    <div>
+                        <div class="pm-label">Full Name</div>
+                        <div class="pm-value" id="pm-name">Loading...</div>
+                    </div>
+                    <div>
+                        <div class="pm-label">Student ID</div>
+                        <div class="pm-value" id="pm-student-id">Loading...</div>
+                    </div>
+                    <div>
+                        <div class="pm-label">Role</div>
+                        <div class="pm-value" id="pm-role">Loading...</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="pm-label">College / Section</div>
+                    <div id="pm-dept" class="pm-value">-</div>
+                </div>
+            </div>
+
+            <div class="pm-section">
+                <div class="pm-section-title pm-section-title--no-border pm-section-title--visit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Visit Purpose
+                </div>
+                <select class="pm-select" id="pm-reason">
+                    <option value="" disabled selected>Select a reason...</option>
+                    <option value="Research / Thesis Work">Research / Thesis Work</option>
+                    <option value="Quiet Study">Quiet Study</option>
+                    <option value="Group Study / Collaboration">Group Study / Collaboration</option>
+                    <option value="Borrowing/Returning Books">Borrowing/Returning Books</option>
+                    <option value="Clearance Signing">Clearance Signing</option>
+                    <option value="Library Card / ID Validation">Library Card / ID Validation</option>
+                    <option value="Resting / Between Classes">Resting / Between Classes</option>
+                    <option value="Computer / Internet Access">Computer / Internet Access</option>
+                    <option value="Printing / Photocopying Services">Printing / Photocopying Services</option>
+                    <option value="Accessing Online Databases/E-Books">Accessing Online Databases/E-Books</option>
+                    <option value="School Event / Seminar / Orientation">School Event / Seminar / Orientation</option>
+                    <option value="Others">Others</option>
+                </select>
+
+                <div class="pm-section-title pm-section-title--no-border pm-section-title--other-reason">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Other Reason
+                </div>
+                <textarea class="pm-textarea" id="pm-other-reason" placeholder="Type your specific reason here..."></textarea>
+            </div>
+
+            <div class="pm-actions">
+                <button class="btn-cancel" id="btn-pm-cancel">Cancel</button>
+                <button class="btn-confirm" id="btn-pm-confirm">
+                    Confirm & Enter Library
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/api.js"></script>
+    <script src="/js/jsQR.min.js"></script>
+    <script src="/js/kiosk.js"></script>
 </body>
 </html>

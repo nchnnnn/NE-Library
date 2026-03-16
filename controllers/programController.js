@@ -1,11 +1,12 @@
-const db = require("../database");
+const programService = require("../services/programServices");
 
 // Get all programs
 const getAllPrograms = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT p.*, c.college_name FROM programs p JOIN colleges c ON p.college_id = c.id ORDER BY c.college_name, p.program_name",
-    );
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    
+    const rows = await programService.getAllPrograms(limit, offset);
     res.status(200).json({
       success: true,
       count: rows.length,
@@ -23,10 +24,10 @@ const getAllPrograms = async (req, res) => {
 const getProgramsByCollege = async (req, res) => {
   try {
     const { collegeId } = req.params;
-    const [rows] = await db.query(
-      "SELECT p.*, c.college_name FROM programs p JOIN colleges c ON p.college_id = c.id WHERE p.college_id = ? ORDER BY p.program_name",
-      [collegeId],
-    );
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    
+    const rows = await programService.getProgramsByCollege(collegeId, limit, offset);
     res.status(200).json({
       success: true,
       count: rows.length,
@@ -44,12 +45,9 @@ const getProgramsByCollege = async (req, res) => {
 const getProgramById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query(
-      "SELECT p.*, c.college_name FROM programs p JOIN colleges c ON p.college_id = c.id WHERE p.id = ?",
-      [id],
-    );
+    const program = await programService.getProgramById(id);
 
-    if (rows.length === 0) {
+    if (!program) {
       return res.status(404).json({
         success: false,
         message: "Program not found",
@@ -58,7 +56,7 @@ const getProgramById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: rows[0],
+      data: program,
     });
   } catch (error) {
     res.status(500).json({
@@ -71,7 +69,7 @@ const getProgramById = async (req, res) => {
 // Create new program
 const createProgram = async (req, res) => {
   try {
-    const { college_id, program_name, program_code, description } = req.body;
+    const { college_id, program_name, program_code } = req.body;
 
     if (!college_id || !program_name) {
       return res.status(400).json({
@@ -80,19 +78,12 @@ const createProgram = async (req, res) => {
       });
     }
 
-    const [result] = await db.query(
-      "INSERT INTO programs (college_id, program_name, program_code, description) VALUES (?, ?, ?, ?)",
-      [college_id, program_name, program_code || null, description || null],
-    );
-
-    const [newProgram] = await db.query("SELECT * FROM programs WHERE id = ?", [
-      result.insertId,
-    ]);
+    const newProgram = await programService.createProgram(college_id, program_name, program_code);
 
     res.status(201).json({
       success: true,
       message: "Program created successfully",
-      data: newProgram[0],
+      data: newProgram,
     });
   } catch (error) {
     res.status(500).json({
@@ -106,67 +97,29 @@ const createProgram = async (req, res) => {
 const updateProgram = async (req, res) => {
   try {
     const { id } = req.params;
-    const { college_id, program_name, program_code, description, status } =
-      req.body;
+    const { college_id, program_name, program_code } = req.body;
 
-    const [existing] = await db.query("SELECT * FROM programs WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await programService.getProgramByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "Program not found",
       });
     }
 
-    const updates = [];
-    const values = [];
+    const updatedProgram = await programService.updateProgram(id, college_id, program_name, program_code);
 
-    if (college_id) {
-      updates.push("college_id = ?");
-      values.push(college_id);
-    }
-    if (program_name) {
-      updates.push("program_name = ?");
-      values.push(program_name);
-    }
-    if (program_code !== undefined) {
-      updates.push("program_code = ?");
-      values.push(program_code);
-    }
-    if (description !== undefined) {
-      updates.push("description = ?");
-      values.push(description);
-    }
-    if (status) {
-      updates.push("status = ?");
-      values.push(status);
-    }
-
-    if (updates.length === 0) {
+    if (!updatedProgram) {
       return res.status(400).json({
         success: false,
         message: "No fields to update",
       });
     }
 
-    values.push(id);
-
-    await db.query(
-      `UPDATE programs SET ${updates.join(", ")} WHERE id = ?`,
-      values,
-    );
-
-    const [updatedProgram] = await db.query(
-      "SELECT * FROM programs WHERE id = ?",
-      [id],
-    );
-
     res.status(200).json({
       success: true,
       message: "Program updated successfully",
-      data: updatedProgram[0],
+      data: updatedProgram,
     });
   } catch (error) {
     res.status(500).json({
@@ -181,18 +134,15 @@ const deleteProgram = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [existing] = await db.query("SELECT * FROM programs WHERE id = ?", [
-      id,
-    ]);
-
-    if (existing.length === 0) {
+    const existing = await programService.getProgramByIdSimple(id);
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: "Program not found",
       });
     }
 
-    await db.query("DELETE FROM programs WHERE id = ?", [id]);
+    await programService.deleteProgram(id);
 
     res.status(200).json({
       success: true,

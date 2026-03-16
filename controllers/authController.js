@@ -1,39 +1,15 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const db = require("../database");
-
-// Helper function to hash password (using bcrypt)
-const hashPassword = (password) => {
-  return bcrypt.hashSync(password, 10);
-};
-
-// Helper function to compare password
-const comparePassword = (password, hashedPassword) => {
-  return bcrypt.compareSync(password, hashedPassword);
-};
-
-// Generate UUID v4
-const generateUUID = () => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
-
-// Generate JWT token
-const generateToken = (user) => {
-  return jwt.sign(
-    { userId: user.id, role_id: user.role_id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "24h" },
-  );
-};
+const authService = require("../services/authServices");
+const { formatDate } = require("../middleware/formatDate");
+const { generateEmployeeId } = require("../middleware/generateEmployeeId");
 
 // Login user (staff only - admin, librarian, management)
 const login = async (req, res) => {
   try {
-    const { email, password, employee_id } = req.body;
+    const { password } = req.body;
+    const email = req.body.email ? req.body.email.trim() : undefined;
+    const employee_id = req.body.employee_id
+      ? req.body.employee_id.trim()
+      : undefined;
 
     // Check if credentials provided
     if ((!email && !employee_id) || !password) {
@@ -43,27 +19,20 @@ const login = async (req, res) => {
       });
     }
 
-    let query = "";
-    let param = "";
+    let user = null;
 
     if (email) {
-      query = "SELECT * FROM staff_users WHERE email = ?";
-      param = email;
+      user = await authService.findStaffByEmail(email);
     } else if (employee_id) {
-      query = "SELECT * FROM staff_users WHERE employee_id = ?";
-      param = employee_id;
+      user = await authService.findStaffByEmployeeId(employee_id);
     }
 
-    const [users] = await db.query(query, [param]);
-
-    if (users.length === 0) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
-
-    const user = users[0];
 
     // Check if user has a password set
     if (!user.password) {
@@ -74,7 +43,7 @@ const login = async (req, res) => {
     }
 
     // Verify password
-    const isMatch = comparePassword(password, user.password);
+    const isMatch = authService.comparePassword(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -91,13 +60,10 @@ const login = async (req, res) => {
       });
     }
 
-    const token = generateToken(user);
+    const token = authService.generateToken(user);
 
     // Get role name
-    const [roles] = await db.query("SELECT role_name FROM roles WHERE id = ?", [
-      user.role_id,
-    ]);
-    const roleName = roles.length > 0 ? roles[0].role_name : "unknown";
+    const roleName = await authService.getRoleName(user.role_id);
 
     res.status(200).json({
       success: true,
@@ -114,6 +80,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).json({
       success: false,
       message: "Error during login",
@@ -124,14 +91,13 @@ const login = async (req, res) => {
 // Register new staff user (admin only)
 const register = async (req, res) => {
   try {
-    const { employee_id, first_name, last_name, email, password, role_id } =
-      req.body;
+    const { employee_id, first_name, last_name, password, role_id } = req.body;
 
-    if (!employee_id || !first_name || !last_name || !password || !role_id) {
+    // Validate required fields FIRST before any async operations
+    if (!first_name || !last_name || !password || !role_id) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide employee_id, first_name, last_name, password, and role_id",
+        message: "Please provide first_name, last_name, password, and role_id",
       });
     }
 
@@ -144,53 +110,62 @@ const register = async (req, res) => {
       });
     }
 
-    // Check if employee_id already exists
-    const [existing] = await db.query(
-      "SELECT * FROM staff_users WHERE employee_id = ? OR email = ?",
-      [employee_id, email],
-    );
+    // Generate email from first_name and last_name
+    const email =
+      first_name.trim().toLowerCase() +
+      "." +
+      last_name.trim().toLowerCase() +
+      "@neu.edu.ph";
 
-    if (existing.length > 0) {
+    // Check if email already exists
+    const existingEmail = await authService.checkEmailExists(email);
+    if (existingEmail) {
       return res.status(400).json({
         success: false,
-        message: "Employee ID or email already registered",
+        message: `A staff user with name ${first_name} ${last_name} already exists (${email}).`,
       });
     }
 
-    // Hash password
-    const hashedPassword = hashPassword(password);
+    // If employee_id not provided, auto-generate it
+    const empId = employee_id || (await generateEmployeeId());
 
-    const [result] = await db.query(
-      "INSERT INTO staff_users (role_id, employee_id, first_name, last_name, email, password, qr_code, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        role_id,
-        employee_id,
-        first_name,
-        last_name,
-        email,
-        hashedPassword,
-        generateUUID(),
-        "active",
-      ],
+    // Check if employee_id already exists (only if explicitly provided)
+    if (employee_id) {
+      const existing = await authService.checkEmployeeIdExists(
+        employee_id.trim(),
+      );
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: "Employee ID already registered",
+        });
+      }
+    }
+
+    const newUser = await authService.createStaffUser(
+      role_id,
+      empId,
+      first_name,
+      last_name,
+      email,
+      password,
     );
 
-    const [newUser] = await db.query("SELECT * FROM staff_users WHERE id = ?", [
-      result.insertId,
-    ]);
-
-    const token = generateToken(newUser[0]);
+    const token = authService.generateToken(newUser);
 
     res.status(201).json({
       success: true,
       message: "Staff user registered successfully",
       token,
       user: {
-        id: newUser[0].id,
-        first_name: newUser[0].first_name,
-        last_name: newUser[0].last_name,
+        id: newUser.id,
+        first_name: newUser.first_name,
+        last_name: newUser.last_name,
       },
+      datetimestamp: formatDate(),
     });
   } catch (error) {
+    console.error("Error during registration:", error);
     res.status(500).json({
       success: false,
       message: "Error during registration",
@@ -201,24 +176,19 @@ const register = async (req, res) => {
 // Get current user profile (staff)
 const getProfile = async (req, res) => {
   try {
-    const [users] = await db.query("SELECT st.id, st.first_name, st.last_name, st.email, st.role_id, r.role_name, st.employee_id, st.status FROM staff_users st, roles r WHERE st.id = ? AND st.role_id = r.id",
-       [req.user.id,]);
+    const user = await authService.findStaffById(req.user.id);
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
 
-    const user = users[0];
-
     res.status(200).json({
       success: true,
-      user
+      user,
     });
-
-    
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -230,27 +200,23 @@ const getProfile = async (req, res) => {
 // Change password (staff)
 const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const { current_password, new_password } = req.body;
 
-    if (!currentPassword || !newPassword) {
+    if (!current_password || !new_password) {
       return res.status(400).json({
         success: false,
-        message: "Please provide currentPassword and newPassword",
+        message: "Please provide current_password and new_password",
       });
     }
 
-    const [users] = await db.query("SELECT * FROM staff_users WHERE id = ?", [
-      req.user.id,
-    ]);
+    const user = await authService.findStaffById(req.user.id);
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
-
-    const user = users[0];
 
     if (!user.password) {
       return res.status(400).json({
@@ -260,7 +226,10 @@ const changePassword = async (req, res) => {
     }
 
     // Verify current password
-    const isMatch = comparePassword(currentPassword, user.password);
+    const isMatch = authService.comparePassword(
+      current_password,
+      user.password,
+    );
 
     if (!isMatch) {
       return res.status(401).json({
@@ -269,13 +238,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const hashedPassword = hashPassword(newPassword);
-
-    await db.query("UPDATE staff_users SET password = ? WHERE id = ?", [
-      hashedPassword,
-      req.user.id,
-    ]);
+    await authService.updatePassword(req.user.id, new_password);
 
     res.status(200).json({
       success: true,
@@ -289,11 +252,256 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Unified QR verify for library entry - handles QR, student_number, or student account (email+password)
+const verifyLibraryEntry = async (req, res) => {
+  try {
+    const { qr_code, student_number, email, password } = req.body;
+
+    console.log("verifyLibraryEntry called with:", {
+      qr_code,
+      student_number,
+      email,
+      password,
+    });
+
+    if (!qr_code && !student_number && !(email && password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide QR code, student number, or student email + password",
+      });
+    }
+
+    // Helper function to format date
+    const formatDateTime = () => {
+      return new Date().toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+    };
+
+    // --- Helper: process student entry ---
+    // At this point the student EXISTS. Check: blocked → inactive → allow
+    const processStudentEntry = async (student) => {
+      // 1. Is the student blocked?
+      const block = await authService.isUserBlocked(student.id);
+      if (block) {
+        await authService.logActivity(
+          student.id,
+          "blocked_entry",
+          block.reason || "Blocked from library access",
+          "student",
+          student.student_number,
+        );
+        return res.status(403).json({
+          success: false,
+          message: "Student is blocked from library access",
+          reason: block.reason || "Blocked",
+          user: {
+            student_number: student.student_number,
+            name: `${student.first_name} ${student.last_name}`,
+            type: "student",
+          },
+          time: formatDateTime(),
+        });
+      }
+
+      // 2. Is the student account active?
+      if (student.status !== "active") {
+        await authService.logActivity(
+          student.id,
+          "blocked_entry",
+          "Student account not active",
+          "student",
+          student.student_number,
+        );
+        return res.status(403).json({
+          success: false,
+          message: "Student account is not active",
+          user: {
+            student_number: student.student_number,
+            name: `${student.first_name} ${student.last_name}`,
+            type: "student",
+          },
+          time: formatDateTime(),
+        });
+      }
+
+      // 3. Student is good — log attendance and allow entry
+      const activeEvent = await authService.getActiveEvent();
+      const purposeRemark = req.body.purpose ? `[${req.body.purpose}] ` : "";
+      const eventRemark = activeEvent
+        ? `${purposeRemark}Library entry - Event: ${activeEvent.title}`
+        : `${purposeRemark}Library entry allowed`;
+      await authService.logAttendance(student.id, eventRemark);
+
+      return res.status(200).json({
+        success: true,
+        message: activeEvent
+          ? `Library entry allowed - ${activeEvent.title}`
+          : "Library entry allowed",
+        user: {
+          id: student.student_number,
+          name: student.first_name + " " + student.last_name,
+          section: student.section_name || "N/A",
+          college: student.college_name || "N/A",
+          type: "student",
+        },
+        event: activeEvent
+          ? {
+              name: activeEvent.title,
+              start: activeEvent.start_datetime,
+              end: activeEvent.end_datetime,
+            }
+          : null,
+        time: formatDateTime(),
+      });
+    };
+
+    // --- MODE 1: Determine User Identity ---
+    let student = null;
+    let staffMember = null;
+
+    if (email && password) {
+      student = await authService.findStudentByEmail(email);
+      if (student) {
+        if (
+          !student.password ||
+          !authService.comparePassword(password, student.password)
+        ) {
+          return res
+            .status(401)
+            .json({ success: false, message: "Invalid student credentials" });
+        }
+      } else {
+        staffMember = await authService.findStaffByEmail(email);
+        if (staffMember) {
+          if (
+            !staffMember.password ||
+            !authService.comparePassword(password, staffMember.password)
+          ) {
+            return res
+              .status(401)
+              .json({ success: false, message: "Invalid staff credentials" });
+          }
+        } else {
+          return res
+            .status(404)
+            .json({ success: false, message: "Account not found" });
+        }
+      }
+    } else if (qr_code) {
+      student = await authService.findStudentByQR(qr_code);
+      if (!student) staffMember = await authService.findStaffByQR(qr_code);
+    } else if (student_number) {
+      student = await authService.findStudentByNumber(student_number);
+      if (!student)
+        staffMember = await authService.findStaffByEmployeeId(student_number);
+    }
+
+    // --- MODE 2: Process Student ---
+    if (student) {
+      return await processStudentEntry(student);
+    }
+    // --- MODE 3: Staff QR Code ---
+    if (staffMember) {
+      if (staffMember.status !== "active") {
+        await authService.logActivity(
+          staffMember.id,
+          "blocked_entry",
+          "Staff account not active",
+          "staff",
+          staffMember.employee_id,
+        );
+        return res.status(403).json({
+          success: false,
+          message: "Staff account is not active",
+          user: {
+            staff_id: staffMember.employee_id,
+            role: staffMember.role_name,
+            type: "staff",
+            time: formatDateTime(),
+          },
+        });
+      }
+
+      const block = await authService.isUserBlocked(staffMember.id);
+      if (block) {
+        await authService.logActivity(
+          staffMember.id,
+          "blocked_entry",
+          block.reason || "Blocked from library access",
+          "staff",
+          staffMember.employee_id,
+        );
+        return res.status(403).json({
+          success: false,
+          message: "Staff is blocked from library access",
+          reason: block.reason || "Blocked",
+          user: {
+            staff_id: staffMember.employee_id,
+            role: staffMember.role_name,
+            type: "staff",
+            time: formatDateTime(),
+          },
+        });
+      }
+
+      const activeEvent = await authService.getActiveEvent();
+      const purposeRemark = req.body.purpose ? `[${req.body.purpose}] ` : "";
+      const eventRemark = activeEvent
+        ? `${purposeRemark}Staff attendance - Event: ${activeEvent.title}`
+        : `${purposeRemark}Staff attendance recorded`;
+      await authService.logAttendance(staffMember.id, eventRemark);
+
+      return res.status(200).json({
+        success: true,
+        message: activeEvent
+          ? `Staff attendance - ${activeEvent.title}`
+          : "Staff attendance recorded",
+        user: {
+          staff_id: staffMember.employee_id,
+          name: `${staffMember.first_name} ${staffMember.last_name}`,
+          role: staffMember.role_name,
+          type: "staff",
+          time: formatDateTime(),
+        },
+        event: activeEvent
+          ? {
+              name: activeEvent.title,
+              start: activeEvent.start_datetime,
+              end: activeEvent.end_datetime,
+            }
+          : null,
+      });
+    }
+
+    // Not found in either table
+    return res
+      .status(404)
+      .json({
+        success: false,
+        message: "No user found with provided credentials",
+      });
+  } catch (error) {
+    console.error("Error in verifyLibraryEntry:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error verifying library entry" });
+  }
+};
+
+// Look up user details without verifying entry (for purpose modal)
+
 module.exports = {
   login,
   register,
   getProfile,
   changePassword,
-  hashPassword,
-  comparePassword,
+  verifyLibraryEntry,
 };
