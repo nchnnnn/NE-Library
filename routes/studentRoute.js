@@ -73,4 +73,20 @@ route.post(
   studentController.unblockStudent,
 );
 
+// Get student activity logs
+route.get(
+  "/students/:id/activity",
+  authenticateToken,
+  requireRole(3, 4),
+  studentController.getStudentActivity,
+);
+
+// Get student attendance logs
+route.get(
+  "/students/:id/attendance",
+  authenticateToken,
+  requireRole(3, 4),
+  studentController.getStudentAttendance,
+);
+
 module.exports = route;

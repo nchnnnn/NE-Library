@@ -32,7 +32,9 @@
             <div class="sidebar-header">
                 <div class="sidebar-brand">
                     <div class="brand-logo">
-                        <i class="fa-solid fa-book-open"></i>
+                        <!-- <i class="fa-solid fa-book-open"></i> -->
+                        <img src="./images/neu.png" alt="">
+
                     </div>
                     <div class="brand-text">
                         <h2>NEU Library</h2>
@@ -228,6 +230,26 @@
                         </div>
                         <div class="filter-group">
                             <div class="filter-input-wrapper">
+                                <input type="text" id="filter-program" placeholder="Filter by Program..." class="filter-input" list="program-list">
+                                <button class="filter-clear-btn" id="clear-program" title="Clear program"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <datalist id="program-list"></datalist>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-input-wrapper">
+                                <input type="text" id="filter-year" placeholder="Filter by Year..." class="filter-input" list="year-list">
+                                <button class="filter-clear-btn" id="clear-year" title="Clear year"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <datalist id="year-list">
+                                <option value="1">
+                                <option value="2">
+                                <option value="3">
+                                <option value="4">
+                                <option value="5">
+                            </datalist>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-input-wrapper">
                                 <input type="text" id="filter-role" placeholder="Filter by Role..." class="filter-input" list="role-list">
                                 <button class="filter-clear-btn" id="clear-role" title="Clear role"><i class="fa-solid fa-times"></i></button>
                             </div>
@@ -246,7 +268,7 @@
                                 <tr>
                                     <th>Profile</th>
                                     <th>Name / ID</th>
-                                    <th>Program / College</th>
+                                    <th>College / Program</th>
                                     <th>Role</th>
                                     <th>Date / Time</th>
                                     <th>Reason</th>
@@ -489,27 +511,37 @@
             <section class="view-section" id="view-users">
                 <div class="page-header">
                     <h2>User Management</h2>
-                    <p>Manage staff users and assign roles</p>
+                    <p>Manage staff users and students — view details, edit accounts, and control access</p>
                 </div>
 
-                <div class="table-card glass-card">
+                <!-- User Type Tabs -->
+                <div class="user-type-tabs">
+                    <button class="user-tab-btn active" data-user-type="staff">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span>Staff</span>
+                    </button>
+                    <button class="user-tab-btn" data-user-type="student">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span>Students</span>
+                    </button>
+                </div>
+
+                <!-- Staff Users Table -->
+                <div class="table-card glass-card user-table-card active" id="staff-users-card">
                     <div class="table-header">
                         <h3 class="table-title">All Staff Users</h3>
                         <div class="table-actions">
-                            <span class="table-count" id="users-count">Total: 0</span>
-                            <button class="btn btn-sm btn-primary" onclick="showAddUserModal()" title="Add New User">
-                                <i class="fa-solid fa-plus"></i> Add User
+                            <span class="table-count" id="staff-users-count">Total: 0</span>
+                            <button class="btn btn-sm btn-primary" onclick="showAddUserModal('staff')" title="Add New Staff">
+                                <i class="fa-solid fa-plus"></i> Add Staff
                             </button>
-                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('users-table', 'Users')" title="Export to CSV">
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('staff-users-table', 'Staff_Users')" title="Export to CSV">
                                 <i class="fa-solid fa-file-csv"></i> Export
-                            </button>
-                            <button class="btn btn-sm btn-outline" onclick="printTable('users-table')" title="Print">
-                                <i class="fa-solid fa-print"></i> Print
                             </button>
                         </div>
                     </div>
                     <div class="table-scroll">
-                        <table id="users-table">
+                        <table id="staff-users-table">
                             <thead>
                                 <tr>
                                     <th>Profile</th>
@@ -517,7 +549,43 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
-                                    <th>Status</th>
+                                    <th>Active</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Inserted by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="table-card glass-card user-table-card" id="student-users-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Students</h3>
+                        <div class="table-actions">
+                            <span class="table-count" id="student-users-count">Total: 0</span>
+                            <button class="btn btn-sm btn-primary" onclick="showAddUserModal('student')" title="Add New Student">
+                                <i class="fa-solid fa-plus"></i> Add Student
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="exportTableToCSV('student-users-table', 'Students')" title="Export to CSV">
+                                <i class="fa-solid fa-file-csv"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="student-users-table">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Student No.</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Program</th>
+                                    <th>Section</th>
+                                    <th>Active</th>
                                     <th>Registered</th>
                                     <th>Actions</th>
                                 </tr>
@@ -638,6 +706,270 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- User Detail Side Panel -->
+    <div class="user-panel-overlay" id="user-panel-overlay" onclick="closeUserPanel()"></div>
+    <div class="user-detail-panel" id="user-detail-panel">
+        <div class="panel-header">
+            <div class="panel-user-identity">
+                <div class="panel-avatar" id="panel-avatar">AD</div>
+                <div class="panel-user-info">
+                    <h3 id="panel-user-name">Loading...</h3>
+                    <span class="panel-user-id" id="panel-user-id"></span>
+                    <span class="panel-role-badge" id="panel-role-badge"></span>
+                </div>
+            </div>
+            <div class="panel-header-actions">
+                <button class="panel-block-btn" id="panel-block-btn" onclick="toggleUserBlock()">
+                    <i class="fa-solid fa-ban"></i>
+                    <span id="panel-block-label">Block</span>
+                </button>
+                <button class="panel-close-btn" onclick="closeUserPanel()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-status-bar" id="panel-status-bar">
+            <span id="panel-status-badge"></span>
+        </div>
+
+        <!-- Panel Tabs -->
+        <div class="panel-tabs">
+            <button class="panel-tab-btn active" data-panel-tab="details">
+                <i class="fa-solid fa-id-card"></i> Details
+            </button>
+            <button class="panel-tab-btn" data-panel-tab="activity">
+                <i class="fa-solid fa-history"></i> Activity
+            </button>
+            <button class="panel-tab-btn" data-panel-tab="attendance">
+                <i class="fa-solid fa-clipboard-check"></i> Attendance
+            </button>
+        </div>
+
+        <!-- Details Tab -->
+        <div class="panel-tab-content active" id="panel-tab-details">
+            <form id="user-edit-form" class="panel-form">
+                <input type="hidden" id="edit-user-id">
+                <input type="hidden" id="edit-user-type">
+                <div class="panel-form-row">
+                    <div class="panel-form-group">
+                        <label>First Name</label>
+                        <input type="text" id="edit-first-name" class="panel-input" placeholder="First Name">
+                    </div>
+                    <div class="panel-form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="edit-last-name" class="panel-input" placeholder="Last Name">
+                    </div>
+                </div>
+                <div class="panel-form-group">
+                    <label>Email</label>
+                    <input type="email" id="edit-email" class="panel-input" placeholder="Email">
+                </div>
+                <!-- Role (Staff) -->
+                <div class="panel-form-group" id="edit-role-group">
+                    <label>Role</label>
+                    <div class="filter-input-wrapper">
+                        <input type="text" id="edit-role-input" class="filter-input" placeholder="Search Role..." list="edit-role-list">
+                        <button type="button" class="filter-clear-btn" onclick="clearEditInput('edit-role-input')"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <datalist id="edit-role-list">
+                        <option value="Librarian">
+                        <option value="Management">
+                        <option value="Admin">
+                    </datalist>
+                    <input type="hidden" id="edit-role">
+                </div>
+
+                <!-- Student Fields (Dynamic) -->
+                <div id="edit-student-fields" style="display:none;">
+                    <div class="panel-form-group">
+                        <label>College</label>
+                        <div class="filter-input-wrapper">
+                            <input type="text" id="edit-college-input" class="filter-input" placeholder="Search College..." list="edit-college-list">
+                            <button type="button" class="filter-clear-btn" onclick="clearEditInput('edit-college-input')"><i class="fa-solid fa-times"></i></button>
+                        </div>
+                        <datalist id="edit-college-list"></datalist>
+                        <input type="hidden" id="edit-college">
+                    </div>
+                    <div class="panel-form-group">
+                        <label>Program</label>
+                        <div class="filter-input-wrapper">
+                            <input type="text" id="edit-program-input" class="filter-input" placeholder="Search Program..." list="edit-program-list">
+                            <button type="button" class="filter-clear-btn" onclick="clearEditInput('edit-program-input')"><i class="fa-solid fa-times"></i></button>
+                        </div>
+                        <datalist id="edit-program-list"></datalist>
+                        <input type="hidden" id="edit-program">
+                    </div>
+                    <div class="panel-form-row">
+                        <div class="panel-form-group">
+                            <label>Year Level</label>
+                            <select id="edit-year" class="panel-select">
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                                <option value="5">5th Year</option>
+                            </select>
+                        </div>
+                        <div class="panel-form-group">
+                            <label>Section</label>
+                            <div class="filter-input-wrapper">
+                                <input type="text" id="edit-section-input" class="filter-input" placeholder="Search Section..." list="edit-section-list">
+                                <button type="button" class="filter-clear-btn" onclick="clearEditInput('edit-section-input')"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <datalist id="edit-section-list"></datalist>
+                            <input type="hidden" id="edit-section">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-form-group">
+                    <label>Status</label>
+                    <select id="edit-status" class="panel-select">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="panel-form-group">
+                    <label>New Password <span style="opacity:0.5;font-size:11px;">(leave blank to keep current)</span></label>
+                    <input type="password" id="edit-password" class="panel-input" placeholder="New password..." autocomplete="new-password">
+                </div>
+                <button type="button" class="btn btn-primary btn-full" onclick="saveUserDetails()">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- Activity Tab -->
+        <div class="panel-tab-content" id="panel-tab-activity">
+            <div class="activity-timeline" id="activity-timeline">
+                <div class="panel-loading"><div class="loader-spinner"></div><span>Loading activity...</span></div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div class="panel-tab-content" id="panel-tab-attendance">
+            <div class="attendance-list" id="attendance-list">
+                <div class="panel-loading"><div class="loader-spinner"></div><span>Loading attendance...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Entity Modal -->
+    <div class="modal-overlay" id="entity-modal">
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3 id="entity-modal-title">Add New</h3>
+                <button class="modal-close" onclick="closeEntityModal()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="entity-form">
+                    <input type="hidden" id="entity-id">
+                    <input type="hidden" id="entity-type">
+                    <div class="form-group" id="college-name-group">
+                        <label for="college-name">College Name</label>
+                        <input type="text" id="college-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="college-code-group">
+                        <label for="college-code">College Code</label>
+                        <input type="text" id="college-code" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="program-name-group" style="display:none;">
+                        <label for="program-name">Program Name</label>
+                        <input type="text" id="program-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="program-code-group" style="display:none;">
+                        <label for="program-code">Program Code</label>
+                        <input type="text" id="program-code" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="program-college-group" style="display:none;">
+                        <label for="program-college">College</label>
+                        <select id="program-college" class="form-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group" id="section-name-group" style="display:none;">
+                        <label for="section-name">Section Name</label>
+                        <input type="text" id="section-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="section-program-group" style="display:none;">
+                        <label for="section-program">Program</label>
+                        <select id="section-program" class="form-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group" id="section-year-group" style="display:none;">
+                        <label for="section-year">Year Level</label>
+                        <select id="section-year" class="form-select">
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                            <option value="5">5th Year</option>
+                        </select>
+                    </div>
+                    <!-- Staff fields -->
+                    <div class="form-group" id="staff-first-name-group" style="display:none;">
+                        <label for="staff-first-name">First Name</label>
+                        <input type="text" id="staff-first-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="staff-last-name-group" style="display:none;">
+                        <label for="staff-last-name">Last Name</label>
+                        <input type="text" id="staff-last-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="staff-email-group" style="display:none;">
+                        <label for="staff-email">Email</label>
+                        <input type="email" id="staff-email" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="staff-role-group" style="display:none;">
+                        <label for="staff-role">Role</label>
+                        <select id="staff-role" class="form-select">
+                            <option value="2">Librarian</option>
+                            <option value="3">Management</option>
+                            <option value="4">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="staff-password-group" style="display:none;">
+                        <label for="staff-password">Password</label>
+                        <input type="password" id="staff-password" class="form-input">
+                    </div>
+                    <!-- Student fields -->
+                    <div class="form-group" id="student-first-name-group" style="display:none;">
+                        <label for="student-first-name">First Name</label>
+                        <input type="text" id="student-first-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="student-last-name-group" style="display:none;">
+                        <label for="student-last-name">Last Name</label>
+                        <input type="text" id="student-last-name" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="student-email-group" style="display:none;">
+                        <label for="student-email">Email</label>
+                        <input type="email" id="student-email" class="form-input" required>
+                    </div>
+                    <div class="form-group" id="student-program-group" style="display:none;">
+                        <label for="student-program">Program</label>
+                        <select id="student-program" class="form-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group" id="student-section-group" style="display:none;">
+                        <label for="student-section">Section</label>
+                        <select id="student-section" class="form-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeEntityModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEntity()">
+                    <i class="fa-solid fa-save"></i> Save
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="/js/api.js"></script>

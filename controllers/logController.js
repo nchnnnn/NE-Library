@@ -3,13 +3,31 @@ const logService = require("../services/logServices");
 // Get attendance logs (with optional filters)
 const getAttendanceLogs = async (req, res) => {
   try {
-    const { user_type, status, start_date, end_date, search, college_id } = req.query;
+    const {
+      user_type,
+      status,
+      start_date,
+      end_date,
+      search,
+      college_id,
+      program_id,
+      year_level,
+    } = req.query;
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
 
-    console.log("Fetching attendance logs with filters:", { user_type, status, start_date, end_date, search, college_id, limit, offset });
-
-    const { logs, total } = await logService.getAttendanceLogs(user_type, status, start_date, end_date, limit, offset, search, college_id);
+    const { logs, total } = await logService.getAttendanceLogs(
+      user_type,
+      status,
+      start_date,
+      end_date,
+      limit,
+      offset,
+      search,
+      college_id,
+      program_id,
+      year_level,
+    );
 
     res.json({
       success: true,
@@ -32,7 +50,12 @@ const getAttendanceStats = async (req, res) => {
   try {
     const { start_date, end_date, college_id, program_id } = req.query;
 
-    const stats = await logService.getAttendanceStats(start_date, end_date, college_id, program_id);
+    const stats = await logService.getAttendanceStats(
+      start_date,
+      end_date,
+      college_id,
+      program_id,
+    );
 
     res.json({
       success: true,

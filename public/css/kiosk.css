@@ -26,8 +26,8 @@ body {
     display: flex;
     padding: 0;
     gap: 0;
-    max-width: 1600px;
-    height: 812px;
+    max-width: 1400px;
+    height: 46.875rem;
     width: 100%;
     margin: 2rem auto;
     align-items: stretch;
@@ -264,8 +264,8 @@ body {
 }
 
 .scanner-container {
-    width: 100%;
-    max-width: 350px;
+    width: 18.875rem;
+    max-width: 21.875rem;
     background: #000;
     border-radius: 16px;
     position: relative;

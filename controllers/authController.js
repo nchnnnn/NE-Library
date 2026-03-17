@@ -257,13 +257,6 @@ const verifyLibraryEntry = async (req, res) => {
   try {
     const { qr_code, student_number, email, password } = req.body;
 
-    console.log("verifyLibraryEntry called with:", {
-      qr_code,
-      student_number,
-      email,
-      password,
-    });
-
     if (!qr_code && !student_number && !(email && password)) {
       return res.status(400).json({
         success: false,

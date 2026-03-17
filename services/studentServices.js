@@ -202,6 +202,7 @@ async function updateStudent(
   password,
   qr_code,
   status,
+  section_id,
 ) {
   const updates = [];
   const values = [];
@@ -218,7 +219,7 @@ async function updateStudent(
     updates.push("email = ?");
     values.push(email);
   }
-  if (password !== undefined) {
+  if (password !== undefined && password !== "") {
     updates.push("password = ?");
     values.push(hashPassword(password));
   }
@@ -229,6 +230,10 @@ async function updateStudent(
   if (status !== undefined) {
     updates.push("status = ?");
     values.push(status);
+  }
+  if (section_id !== undefined) {
+    updates.push("section_id = ?");
+    values.push(section_id);
   }
 
   if (updates.length === 0) {
@@ -282,6 +287,42 @@ async function unblockStudent(userId) {
   return result.affectedRows;
 }
 
+// Get student activity logs
+async function getStudentActivity(studentId, limit = 50) {
+  const [logs] = await db.query(
+    `SELECT 
+      al.id,
+      al.user_id,
+      al.action_type,
+      al.description,
+      al.created_at
+    FROM activity_logs al
+    WHERE al.user_id = ?
+    ORDER BY al.created_at DESC
+    LIMIT ?`,
+    [studentId, limit]
+  );
+  return logs;
+}
+
+// Get student attendance logs
+async function getStudentAttendance(studentId, limit = 50) {
+  const [logs] = await db.query(
+    `SELECT 
+      al.id,
+      al.user_id,
+      al.time_in,
+      al.remarks,
+      al.created_at
+    FROM attendance_logs al
+    WHERE al.user_id = ?
+    ORDER BY al.time_in DESC
+    LIMIT ?`,
+    [studentId, limit]
+  );
+  return logs;
+}
+
 module.exports = {
   getAllStudents,
   getStudentsBySection,
@@ -296,4 +337,6 @@ module.exports = {
   getExistingBlock,
   blockStudent,
   unblockStudent,
+  getStudentActivity,
+  getStudentAttendance,
 };

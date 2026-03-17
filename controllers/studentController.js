@@ -44,8 +44,7 @@ const getStudentsBySection = async (req, res) => {
     const { section } = req.params;
     const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
     const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
-
-    console.log("Fetching students for section:", section, "limit:", limit, "offset:", offset);
+    ;
     const rows = await studentService.getStudentsBySection(section, limit, offset);
 
     res.status(200).json({
@@ -67,7 +66,7 @@ const getStudentsByProgram = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
     const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
 
-    console.log(program, "limit:", limit, "offset:", offset);
+   
     const rows = await studentService.getStudentsByProgram(program, limit, offset);
 
     res.status(200).json({
@@ -245,7 +244,8 @@ const updateStudent = async (req, res) => {
       email,
       password,
       qr_code,
-      status
+      status,
+      req.body.section_id
     );
 
     if (!updatedStudent) {
@@ -371,7 +371,6 @@ const blockStudent = async (req, res) => {
 // Unblock student to allow library access
 const unblockStudent = async (req, res) => {
   try {
-    // Check if user is authenticated and has proper role
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -379,7 +378,6 @@ const unblockStudent = async (req, res) => {
       });
     }
 
-    // Check if user has Librarian (2), Management (3) or Admin (4) role
     if (req.user.role_id !== 2 && req.user.role_id !== 3 && req.user.role_id !== 4) {
       return res.status(403).json({
         success: false,
@@ -419,6 +417,36 @@ const unblockStudent = async (req, res) => {
   }
 };
 
+// Get student activity logs
+const getStudentActivity = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+    const limit = parseInt(req.query.limit) || 50;
+    const logs = await studentService.getStudentActivity(req.params.id, limit);
+    res.status(200).json({ success: true, data: logs });
+  } catch (error) {
+    console.error("Error fetching student activity:", error);
+    res.status(500).json({ success: false, message: "Error fetching activity logs" });
+  }
+};
+
+// Get student attendance logs
+const getStudentAttendance = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+    const limit = parseInt(req.query.limit) || 50;
+    const logs = await studentService.getStudentAttendance(req.params.id, limit);
+    res.status(200).json({ success: true, data: logs });
+  } catch (error) {
+    console.error("Error fetching student attendance:", error);
+    res.status(500).json({ success: false, message: "Error fetching attendance logs" });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getStudentById,
@@ -427,6 +455,8 @@ module.exports = {
   deleteStudent,
   blockStudent,
   unblockStudent,
+  getStudentActivity,
+  getStudentAttendance,
   getStudentsBySection,
   getStudentsByProgram,
 };
